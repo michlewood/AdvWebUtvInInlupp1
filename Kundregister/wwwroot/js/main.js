@@ -16,7 +16,7 @@ $("#countCustomers").click(function () {
 $("#addForm button").click(function () {
 
     $.ajax({
-        url: '/api/Customers/',
+        url: '/api/Customers/addnewcustomer',
         method: 'POST',
         data: {
             "FirstName": $("#addForm [name=FirstName]").val(),
@@ -182,30 +182,29 @@ function AddressFunctions() {
         console.log(idOfCustomer);
         $.ajax({
             url: 'api/customers/addnewaddress',
-            method: 'GET',
+            method: 'POST',
             data: { id: idOfCustomer }
         })
             .done(function (result) {
                 $("#status").text(result);
                 $('#status').append("<hr />");
-            })
-    })
+            });
+    });
 
     $(".addressDelete").click(function (id) {
         let idOfCustomer = parseInt(document.body.getElementsByClassName("customer")[0].getAttribute("value"));
         let idOfAddress = this.id;
         console.log(idOfAddress);
         $.ajax({
-            url: 'api/customers/deleteaddressrelation',
+            url: 'api/customers/deleteaddress',
             method: 'POST',
             data: { custId: idOfCustomer, addressId: idOfAddress }
         })
             .done(function (result) {
                 $("#status").text(result);
                 $('#status').append("<hr />");
-            })
-
-    })
+            });
+    });
 }
 
 $("#seedCustomers").click(function () {

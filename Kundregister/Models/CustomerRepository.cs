@@ -17,7 +17,7 @@ namespace Kundregister.Models
 
         public IEnumerable<Customer> GetAllCustomers(DatabaseContext databaseContext)
         {
-            return databaseContext.GetAllCostumers();
+            return databaseContext.GetAllCustomers();
         }
 
         public Customer GetCustomerById(int idOfCustomer, DatabaseContext databaseContext)
@@ -37,6 +37,8 @@ namespace Kundregister.Models
             var customers = getCustomersFromTextFile(fileLocation);
 
             databaseContext.Customers.RemoveRange(databaseContext.Customers);
+            databaseContext.Addresses.RemoveRange(databaseContext.Addresses);
+            databaseContext.Relations.RemoveRange(databaseContext.Relations);
             databaseContext.AddRange(customers);
 
             databaseContext.SaveChanges();

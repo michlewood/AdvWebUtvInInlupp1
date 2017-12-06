@@ -15,7 +15,7 @@ namespace Kundregister.Entities
 
         }
 
-        internal List<Customer> GetAllCostumers()
+        internal List<Customer> GetAllCustomers()
         {
             var dataSet = Customers;
 
