@@ -33,7 +33,7 @@ namespace Kundregister.Controllers
         {
             var listOfCustomers = customerRepository.GetAllCustomers();
 
-            _logger.LogInformation("Get all called");
+            _logger.LogInformation("GetAllCustomers called");
 
             return listOfCustomers;
         }
