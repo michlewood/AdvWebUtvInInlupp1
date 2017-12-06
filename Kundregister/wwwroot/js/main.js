@@ -74,7 +74,7 @@ $("#getAll").click(function () {
         .done(function (result) {
             let generatedResult = '<table class="table table-sm table-dark table-striped"><thead><tr>'
                 + '<th scope= "col">#</th>'
-                + '<th scope= "col">First Name</th>' 
+                + '<th scope= "col">First Name</th>'
                 + '<th scope= "col">Last Name</th>'
                 + '<th scope= "col">Gender</th>'
                 + '<th scope= "col">Email</th>'
@@ -153,8 +153,20 @@ $("#getAll").click(function () {
                         + '</tr></thead> ';
 
                     $.each(result, function (index, item) {
-                        modalContent += '<tr><th scope="row">' + item.id + '</th><td>' + item.streetName + '</td><td>' + item.streetNumber + '</td><td>' + item.postalCode + '</td><td>' + item.area + '</td>'
-                            + '<td><a href="#" class="addressDelete" id="' + item.id + '" data-title="Delete"><button class="btn btn-danger">X</button></a></td></tr>';
+                        //modalContent += '<tr><th scope="row">' + item.id + '</th>'
+                        //    + '<td> ' + item.streetName + '</td > '
+                        //    + '<td> ' + item.streetNumber + '</td > '
+                        //    + '<td> ' + item.postalCode + '</td > '
+                        //    + '<td> ' + item.area + '</td > '
+                        //    + '<td><a href="#" class="addressDelete" id="' + item.id + '" data-title="Delete"><button class="btn btn-danger">X</button></a></td></tr>';
+
+                        modalContent += '<tr><th scope="row">' + item.id
+                            + '</th><td><span href="#" class="editAddress" data-name="streetName" data-type="text" data-pk="' + item.id + '" data-title="Enter Street Name">' + item.streetName + '</span></td>'
+                            + '</th><td><span href="#" class="editAddress" data-name="streetNumber" data-type="text" data-pk="' + item.id + '" data-title="Enter Street Number">' + item.streetNumber + '</span></td>'
+                            + '</th><td><span href="#" class="editAddress" data-name="postalCode" data-type="text" data-pk="' + item.id + '" data-title="Enter Postal Code">' + item.postalCode + '</span></td>'
+                            + '</th><td><span href="#" class="editAddress" data-name="area" data-type="text" data-pk="' + item.id + '" data-title="Enter Area Name">' + item.area + '</span></td>'
+                            + '</th><td class="addressDelete" id=' + item.id + '><button class="btn btn-danger">X</button></td>'
+                            + '</td></tr>';
                     });
 
                     modalContent += '</tbody >'
@@ -167,7 +179,7 @@ $("#getAll").click(function () {
                     $("#addressModal").html(modalContent);
                     $("#addressModal").modal(show = true);
 
-                    AddressFunctions();
+                    AddressFunctions(idForCustomer);
                 });
 
             });
@@ -181,12 +193,11 @@ $("#getAll").click(function () {
         });
 });
 
-function AddressFunctions() {
-    $(".newAddress").click(function (id) {
-        let idOfCustomer = parseInt(document.body.getElementsByClassName("customer")[0].getAttribute("value"));
-        console.log(idOfCustomer);
+function AddressFunctions(customerId) {
+    $(".newAddress").click(function () {
+        console.log(customerId);
         $.ajax({
-            url: `api/customers/${idOfCustomer}/address`,
+            url: `api/customers/${customerId}/address`,
             method: 'POST'
         })
             .done(function (result) {
@@ -195,18 +206,28 @@ function AddressFunctions() {
             });
     });
 
-    $(".addressDelete").click(function (id) {
-        let idOfCustomer = parseInt(document.body.getElementsByClassName("customer")[0].getAttribute("value"));
+    $(".addressDelete").click(function () {
         let idOfAddress = this.id;
         console.log(idOfAddress);
         $.ajax({
-            url: `api/customers/${idOfCustomer}/address/${idOfAddress}`,
+            url: `api/customers/${customerId}/address/${idOfAddress}`,
             method: 'DELETE'
         })
             .done(function (result) {
                 $("#status").text(result);
                 $('#status').append("<hr />");
             });
+    });
+
+    $(".editAddress").editable({
+        type: 'text',
+        url: `/api/customers/${customerId}/address/${this.id }`,
+        success: function (response) {
+            $("#status").html(response)
+        },
+        fail: function (response) {
+            $("#status").html(response);
+        }
     });
 }
 

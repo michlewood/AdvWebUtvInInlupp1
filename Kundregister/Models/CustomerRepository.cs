@@ -90,5 +90,22 @@ namespace Kundregister.Models
 
             return worked;
         }
+
+        public bool UpdateAddress(Address addressToEdit, string nameOfThePropertyToUpdateTheValueOf, string newValue)
+        {
+            var property = addressToEdit.GetType().GetProperties()
+                .SingleOrDefault(prop => prop.Name.Equals(nameOfThePropertyToUpdateTheValueOf));
+
+            bool worked = true;
+
+            if (property.PropertyType == typeof(int))
+            {
+                worked = int.TryParse(newValue, out int parsedValue);
+                if (worked) property.SetValue(addressToEdit, parsedValue);
+            }
+            else property.SetValue(addressToEdit, newValue);
+
+            return worked;
+        }
     }
 }

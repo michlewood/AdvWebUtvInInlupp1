@@ -175,5 +175,23 @@ namespace Kundregister.Controllers
 
             return Ok("Relations removed");
         }
+
+        [HttpPost, Route("{custId}/address/{pk}")]
+        public IActionResult EditAddress(string name, string pk, string value)
+        {
+            var addressId = int.Parse(pk);
+            var capitalizedPropertyName = CapitalizeFirstLetterWithoutTouchingTheRest(name);
+            var addressToEdit = databaseContext.Addresses.SingleOrDefault(address => address.Id == addressId);
+
+            bool worked = customerRepository.UpdateAddress(addressToEdit, capitalizedPropertyName, value);
+
+            if (worked)
+            {
+                databaseContext.SaveChanges();
+                return Ok($"Updated {capitalizedPropertyName} of id: {addressToEdit.Id} to {value}");
+            }
+
+            else return BadRequest("incorrect value");
+        }
     }
 }
