@@ -57,16 +57,22 @@ namespace Kundregister.Controllers
         }
 
         [HttpGet, Route("{id}")]
-        public IActionResult GetUsingId(int id)
+        public IActionResult GetCustomerById(int id)
         {
             var customer = customerRepository.GetCustomerById(id);
 
             if (customer != null)
             {
-                return Ok($"{customer.Id}. {customer.FirstName} {customer.LastName} - {customer.Gender} - {customer.Email} - {customer.Age} years old");
+                _logger.LogInformation("GetCustomerById called - Success");
+                return Ok(customer);
+                //return Ok($"{customer.Id}. {customer.FirstName} {customer.LastName} - {customer.Gender} - {customer.Email} - {customer.Age} years old");
             }
 
-            else return NotFound($"A customer with the Id {id} was not found");
+            else
+            {
+                _logger.LogInformation("GetCustomerById called - Failed");
+                return NotFound($"A customer with the Id {id} was not found");
+            }
         }
 
         public string CapitalizeFirstLetterWithoutTouchingTheRest(string input)
@@ -88,10 +94,15 @@ namespace Kundregister.Controllers
             if (worked)
             {
                 databaseContext.SaveChanges();
+                _logger.LogInformation("EditCustomer called - Success");
                 return Ok($"Updated {capitalizedPropertyName} of id: {customerToEdit.Id} to {value}");
             }
 
-            else return BadRequest("incorrect value");
+            else
+            {
+                _logger.LogInformation("EditCustomer called - Failed");
+                return BadRequest("incorrect value");
+            }
         }
 
         [HttpDelete, Route("{id}")]
@@ -100,12 +111,14 @@ namespace Kundregister.Controllers
             var customerToRemove = customerRepository.GetCustomerById(id);
             customerRepository.RemoveCustomer(customerToRemove);
 
+            _logger.LogInformation("DeleteCustomer called - Success");
             return Ok("Customer removed");
         }
 
         [HttpGet, Route("count")]
         public IActionResult CountCustomers()
         {
+            _logger.LogInformation("CountCustomers called - Success");
             return Ok(databaseContext.Customers.Count());
         }
 
@@ -116,12 +129,14 @@ namespace Kundregister.Controllers
 
             customerRepository.SeedCustomers(dataLocation);
 
+            _logger.LogInformation("SeedCustomers called - Success");
             return Ok("seeded database");
         }
 
         [HttpGet, Route("{id}/address")]
-        public IEnumerable<Address> ShowCustomerAddresses(int id)
+        public IEnumerable<Address> GetCustomerAddresses(int id)
         {
+            _logger.LogInformation("GetCustomerAddresses called - Success");
             return databaseContext.GetAllAddressesForGivenCustomerId(id);
         }
 
@@ -150,22 +165,24 @@ namespace Kundregister.Controllers
             databaseContext.Add(relation);
             databaseContext.SaveChanges();
 
+            _logger.LogInformation("AddNewAddress called - Success");
             return Ok("new address added");
         }
 
         [HttpDelete, Route("{custId}/address/{addressId}")]
         public IActionResult RemoveAddress(int custId, int addressId)
         {
-            RemoveRelationsWithAddressId(addressId);
+            RemoveRelationsByAddressId(addressId);
             var addressToRemove = databaseContext.Addresses.Single(address => address.Id == addressId);
             databaseContext.Remove(addressToRemove);
             databaseContext.SaveChanges();
 
+            _logger.LogInformation("RemoveAddress called - Success");
             return Ok("address and all relations removed");
         }
 
         [HttpDelete, Route("address/{addressId}")]
-        private IActionResult RemoveRelationsWithAddressId(int addressId)
+        private IActionResult RemoveRelationsByAddressId(int addressId)
         {
             var relationsToRemove = databaseContext.Relations.Where(relation => relation.AdressId == addressId);
             foreach (var relation in relationsToRemove)
@@ -173,6 +190,7 @@ namespace Kundregister.Controllers
                 databaseContext.Remove(relation);
             }
 
+            _logger.LogInformation("RemoveRelationsByAddressId called - Success");
             return Ok("Relations removed");
         }
 
@@ -188,10 +206,15 @@ namespace Kundregister.Controllers
             if (worked)
             {
                 databaseContext.SaveChanges();
+                _logger.LogInformation("EditAddress called - Success");
                 return Ok($"Updated {capitalizedPropertyName} of id: {addressToEdit.Id} to {value}");
             }
 
-            else return BadRequest("incorrect value");
+            else
+            {
+                _logger.LogInformation("EditAddress called - Failed");
+                return BadRequest("incorrect value");
+            }
         }
     }
 }

@@ -39,7 +39,7 @@ $("#addForm button").click(function () {
             let concatinatedErrorMessage = "";
 
             $.each(errorMessages, function (index, item) {
-                concatinatedErrorMessage += item[0] + " ";
+                concatinatedErrorMessage += `${item[0]} `;
             });
             $("#status").text(concatinatedErrorMessage);
             $('#status').append("<hr />");
@@ -55,7 +55,16 @@ $("#getOne").click(function () {
         method: 'GET'
     })
         .done(function (result) {
-            $("#status").text(result);
+            if (idNumber == "") {
+                $("#status").text(`Please enter a number`);
+            }
+            else if (result.length == 1) {
+                $("#status").text(`A customer with the Id ${idNumber} was not found`);
+            }
+            else {
+                $("#status").text(`${result.id}. ${result.firstName} ${result.lastName} - ${result.gender} - ${result.email} - ${result.age} years old`);
+            }
+
             $('#status').append("<hr />");
         })
 
@@ -82,20 +91,25 @@ $("#getAll").click(function () {
                 + '<th scope= "col">Adress</th>'
                 + '<th scope= "col">Delete</th>'
                 + '</tr ></thead ><tbody>';
+            if (result.length == 0) {
+                generatedResult += '<h2>No customers</h2>'
+            }
 
-            $.each(result, function (index, item) {
-                console.log(item);
-                generatedResult += '<tr id="customerNumber' + (index + 1) + '">' +
-                    '<th scope="row">' + item.id + '</th>' +
-                    '<td><a href="#" class="edit" data-name="firstName" data-type="text" data-pk="' + item.id + '" data-title="Enter First Name">' + item.firstName + '</a></td>' +
-                    '<td><a href="#" class="edit" data-name="lastName" data-type="text" data-pk="' + item.id + '" data-title="Enter Last Name">' + item.lastName + '</a></td>' +
-                    '<td><a href="#" class="edit" data-name="gender" data-type="text" data-pk="' + item.id + '" data-title="Enter Gender">' + item.gender + '</a></td>' +
-                    '<td><a href="#" class="edit" data-name="email" data-type="text" data-pk="' + item.id + '" data-title="Enter Email">' + item.email + '</a></td>' +
-                    '<td><a href="#" class="edit" data-name="age" data-type="text" data-pk="' + item.id + '" data-title="Enter Age">' + item.age + '</a></td>' +
-                    '<td><a href="#" class="address" id="' + item.id + '" data-title="Address"><button class="btn btn-info">A</button></a></td>' +
-                    '<td><a href="#" class="delete" id="' + item.id + '" data-title="Delete"><button class="btn btn-danger">X</button></a></td>' +
-                    '</tr>';
-            });
+            else {
+                $.each(result, function (index, item) {
+                    console.log(item);
+                    generatedResult += '<tr id="customerNumber' + (index + 1) + '">' +
+                        `<th scope="row">${item.id}</th>` +
+                        `<td><a href="#" class="edit" data-name="firstName" data-type="text" data-pk="${item.id}" data-title="Enter First Name">${item.firstName}</a></td>` +
+                        `<td><a href="#" class="edit" data-name="lastName" data-type="text" data-pk="${item.id}" data-title="Enter Last Name">${item.lastName}</a></td>` +
+                        `<td><a href="#" class="edit" data-name="gender" data-type="text" data-pk="${item.id}" data-title="Enter Gender">${item.gender}</a></td>` +
+                        `<td><a href="#" class="edit" data-name="email" data-type="text" data-pk="${item.id}" data-title="Enter Email">${item.email}</a></td>` +
+                        `<td><a href="#" class="edit" data-name="age" data-type="text" data-pk="${item.id}" data-title="Enter Age">${item.age}</a></td>` +
+                        `<td><a href="#" class="address" id="${item.id}" data-title="Address"><button class="btn btn-info">A</button></a></td>` +
+                        `<td><a href="#" class="delete" id="${item.id}" data-title="Delete"><button class="btn btn-danger">X</button></a></td>` +
+                        '</tr>';
+                });
+            }
 
             generatedResult += "</tbody ></table >";
 
@@ -135,39 +149,38 @@ $("#getAll").click(function () {
                     let modalContent = '<div class="modal-dialog" role="document">'
                         + '<div class="modal-content">'
                         + '<div class="modal-header">'
-                        + '<h5 class="modal-title customer" id="addressModalLabel" value="' + idForCustomer + '">Addresses</h5>'
+                        + `<h5 class="modal-title customer" id="addressModalLabel" value="${idForCustomer}">Addresses</h5>`
                         + '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'
                         + '<span aria-hidden="true">&times;</span>'
                         + '</button>'
                         + '</div>'
                         + '<div class="modal-body">'
                         + '<table class="table">'
-                        + '<tbody>'
-                        + '<thead><tr>'
-                        + '<th scope="col">#</th>'
-                        + '<th scope="col">Street</th>'
-                        + '<th scope="col">Number</th> '
-                        + '<th scope="col">Postcode</th> '
-                        + '<th scope="col">Area</th> '
-                        + '<th scope="col">Delete</th> '
-                        + '</tr></thead> ';
+                        + '<tbody>';
 
-                    $.each(result, function (index, item) {
-                        //modalContent += '<tr><th scope="row">' + item.id + '</th>'
-                        //    + '<td> ' + item.streetName + '</td > '
-                        //    + '<td> ' + item.streetNumber + '</td > '
-                        //    + '<td> ' + item.postalCode + '</td > '
-                        //    + '<td> ' + item.area + '</td > '
-                        //    + '<td><a href="#" class="addressDelete" id="' + item.id + '" data-title="Delete"><button class="btn btn-danger">X</button></a></td></tr>';
+                    if (result.length === 0) {
+                        modalContent += '<h2>No addresses</h2>';
+                    }
+                    else {
+                        modalContent += '<thead><tr>'
+                            + '<th scope="col">#</th>'
+                            + '<th scope="col">Street</th>'
+                            + '<th scope="col">Number</th> '
+                            + '<th scope="col">Postcode</th> '
+                            + '<th scope="col">Area</th> '
+                            + '<th scope="col">Delete</th> '
+                            + '</tr></thead>';
 
-                        modalContent += '<tr><th scope="row">' + item.id
-                            + '</th><td><span href="#" class="editAddress" data-name="streetName" data-type="text" data-pk="' + item.id + '" data-title="Enter Street Name">' + item.streetName + '</span></td>'
-                            + '</th><td><span href="#" class="editAddress" data-name="streetNumber" data-type="text" data-pk="' + item.id + '" data-title="Enter Street Number">' + item.streetNumber + '</span></td>'
-                            + '</th><td><span href="#" class="editAddress" data-name="postalCode" data-type="text" data-pk="' + item.id + '" data-title="Enter Postal Code">' + item.postalCode + '</span></td>'
-                            + '</th><td><span href="#" class="editAddress" data-name="area" data-type="text" data-pk="' + item.id + '" data-title="Enter Area Name">' + item.area + '</span></td>'
-                            + '</th><td class="addressDelete" id=' + item.id + '><button class="btn btn-danger">X</button></td>'
-                            + '</td></tr>';
-                    });
+                        $.each(result, function (index, item) {
+                            modalContent += `<tr><th scope="row">${item.id}</th >`
+                                + `<td><span href="#" class="editAddress" data-name="streetName" data-type="text" data-pk="${item.id}" data-title="Enter Street Name">${item.streetName}</span></td>`
+                                + `<td><span href="#" class="editAddress" data-name="streetNumber" data-type="text" data-pk="${item.id}" data-title="Enter Street Number">${item.streetNumber}</span></td>`
+                                + `<td><span href="#" class="editAddress" data-name="postalCode" data-type="text" data-pk="${item.id}" data-title="Enter Postal Code">${item.postalCode}</span></td>`
+                                + `<td><span href="#" class="editAddress" data-name="area" data-type="text" data-pk="${item.id}" data-title="Enter Area Name">${item.area}</span></td>`
+                                + `<td class="addressDelete" id=${item.id}><button class="btn btn-danger">X</button></td>`
+                                + '</td ></tr >';
+                        });
+                    }
 
                     modalContent += '</tbody >'
                         + '</table >'
@@ -181,13 +194,10 @@ $("#getAll").click(function () {
 
                     AddressFunctions(idForCustomer);
                 });
-
             });
-
-
         })
 
-        .fail(function (xhr, status, error) {
+        .fail(function (xhr, status, error) {s
             $("#status").text(xhr.responseText);
             $('#status').append("<hr />");
         });
@@ -221,7 +231,7 @@ function AddressFunctions(customerId) {
 
     $(".editAddress").editable({
         type: 'text',
-        url: `/api/customers/${customerId}/address/${this.id }`,
+        url: `/api/customers/${customerId}/address/${this.id}`,
         success: function (response) {
             $("#status").html(response)
         },
