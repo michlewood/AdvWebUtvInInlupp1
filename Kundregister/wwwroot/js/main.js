@@ -27,7 +27,6 @@ $("#addForm button").click(function () {
         }
     })
         .done(function (result) {
-
             $("#getAll").click();
             console.log("Success!", result);
             $('#status').text("new customer created");
@@ -47,7 +46,7 @@ $("#addForm button").click(function () {
         });
 });
 
-$("#getOne").click(function () {
+$("#getOneCustomer").click(function () {
     let idNumber = $("#idNumber").val();
     console.log(idNumber);
     $.ajax({
@@ -75,7 +74,7 @@ $("#getOne").click(function () {
 });
 
 
-$("#getAll").click(function () {
+$("#getAllCustomers").click(function () {
     $.ajax({
         url: '/api/customers',
         method: 'GET'

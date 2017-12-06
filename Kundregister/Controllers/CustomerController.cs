@@ -65,7 +65,6 @@ namespace Kundregister.Controllers
             {
                 _logger.LogInformation("GetCustomerById called - Success");
                 return Ok(customer);
-                //return Ok($"{customer.Id}. {customer.FirstName} {customer.LastName} - {customer.Gender} - {customer.Email} - {customer.Age} years old");
             }
 
             else
