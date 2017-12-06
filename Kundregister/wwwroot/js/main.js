@@ -4,7 +4,7 @@
 
 $("#countCustomers").click(function () {
     $.ajax({
-        url: '/api/customers/countcustomers',
+        url: '/api/customers/count',
         method: 'GET'
     }).done(function (result) {
         console.log(result);
@@ -16,7 +16,7 @@ $("#countCustomers").click(function () {
 $("#addForm button").click(function () {
 
     $.ajax({
-        url: '/api/Customers/addnewcustomer',
+        url: '/api/customers',
         method: 'POST',
         data: {
             "FirstName": $("#addForm [name=FirstName]").val(),
@@ -51,9 +51,8 @@ $("#getOne").click(function () {
     let idNumber = $("#idNumber").val();
     console.log(idNumber);
     $.ajax({
-        url: '/api/customers/getusingid',
-        method: 'GET',
-        data: { id: idNumber }
+        url: `/api/customers/${idNumber}`,
+        method: 'GET'
     })
         .done(function (result) {
             $("#status").text(result);
@@ -69,12 +68,20 @@ $("#getOne").click(function () {
 
 $("#getAll").click(function () {
     $.ajax({
-        url: '/api/customers/getallcustomers',
+        url: '/api/customers',
         method: 'GET'
     })
         .done(function (result) {
-
-            let generatedResult = '<table class="table table-sm table-dark table-striped"><thead><tr><th scope="col">#</th><th scope="col">First Name</th><th scope="col">Last Name</th><th scope="col">Gender</th><th scope="col">Email</th><th scope="col">Age</th><th scope="col">Adress</th><th scope="col">Delete</th></tr></thead><tbody>';
+            let generatedResult = '<table class="table table-sm table-dark table-striped"><thead><tr>'
+                + '<th scope= "col">#</th>'
+                + '<th scope= "col">First Name</th>' 
+                + '<th scope= "col">Last Name</th>'
+                + '<th scope= "col">Gender</th>'
+                + '<th scope= "col">Email</th>'
+                + '<th scope= "col">Age</th>'
+                + '<th scope= "col">Adress</th>'
+                + '<th scope= "col">Delete</th>'
+                + '</tr ></thead ><tbody>';
 
             $.each(result, function (index, item) {
                 console.log(item);
@@ -96,7 +103,7 @@ $("#getAll").click(function () {
 
             $(".edit").editable({
                 type: 'text',
-                url: '/api/customers/editcustomer',
+                url: `/api/customers/${this.id}`,
                 fail: function (response) {
                     console.log(response);
                 }
@@ -106,9 +113,8 @@ $("#getAll").click(function () {
                 let deleteId = this.id;
                 console.log(deleteId);
                 $.ajax({
-                    url: '/api/customers/deletecustomer',
-                    method: 'POST',
-                    data: { id: deleteId }
+                    url: '/api/customers/' + deleteId,
+                    method: 'DELETE'
 
                 }).done(function () {
                     $("#getAll").click();
@@ -122,9 +128,8 @@ $("#getAll").click(function () {
 
                 console.log(this.id);
                 $.ajax({
-                    url: '/api/customers/showcustomeraddresses',
-                    method: 'GET',
-                    data: { id: idForCustomer }
+                    url: `/api/customers/${idForCustomer}/address`,
+                    method: 'GET'
 
                 }).done(function (result) {
                     let modalContent = '<div class="modal-dialog" role="document">'
@@ -157,7 +162,7 @@ $("#getAll").click(function () {
                         + '</div >'
                         + '<div class="modal-footer">'
                         + '<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>'
-                        + '<button type="button" class="btn btn-primary NewAddress">Add New</button>'
+                        + '<button type="button" class="btn btn-primary newAddress">Add New</button>'
                         + '</div></div></div>';
                     $("#addressModal").html(modalContent);
                     $("#addressModal").modal(show = true);
@@ -177,13 +182,12 @@ $("#getAll").click(function () {
 });
 
 function AddressFunctions() {
-    $(".NewAddress").click(function (id) {
+    $(".newAddress").click(function (id) {
         let idOfCustomer = parseInt(document.body.getElementsByClassName("customer")[0].getAttribute("value"));
         console.log(idOfCustomer);
         $.ajax({
-            url: 'api/customers/addnewaddress',
-            method: 'POST',
-            data: { id: idOfCustomer }
+            url: `api/customers/${idOfCustomer}/address`,
+            method: 'POST'
         })
             .done(function (result) {
                 $("#status").text(result);
@@ -196,9 +200,8 @@ function AddressFunctions() {
         let idOfAddress = this.id;
         console.log(idOfAddress);
         $.ajax({
-            url: 'api/customers/deleteaddress',
-            method: 'POST',
-            data: { custId: idOfCustomer, addressId: idOfAddress }
+            url: `api/customers/${idOfCustomer}/address/${idOfAddress}`,
+            method: 'DELETE'
         })
             .done(function (result) {
                 $("#status").text(result);
@@ -209,7 +212,7 @@ function AddressFunctions() {
 
 $("#seedCustomers").click(function () {
     $.ajax({
-        url: '/api/customers/seedcustomers',
+        url: '/api/customers/seed',
         method: 'GET'
     })
         .done(function (result) {

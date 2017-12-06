@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Kundregister.Entities;
 using NLog.Web;
 using NLog.Extensions.Logging;
+using Microsoft.AspNetCore.Http;
 
 namespace Kundregister
 {
@@ -32,6 +33,7 @@ namespace Kundregister
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddMvc();
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

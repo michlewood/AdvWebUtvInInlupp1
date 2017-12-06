@@ -12,7 +12,7 @@ namespace Kundregister.Entities
 
         public DbSet<CustomerToAddressRelations> Relations { get; set; }
 
-        internal List<Address> GetAllAddresses(int custId)
+        internal IEnumerable<Address> GetAllAddressesForGivenCustomerId(int custId)
         {
             var databaseListofCustomerAddresses = new List<Address>();
 

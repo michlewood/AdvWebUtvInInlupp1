@@ -8,8 +8,6 @@ using System.Globalization;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
 
-// For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace Kundregister.Controllers
 {
     [Route("api/customers")]
@@ -25,49 +23,43 @@ namespace Kundregister.Controllers
         public CustomerController(DatabaseContext databaseContext, ILogger<CustomerController> logger)
         {
             this.databaseContext = databaseContext;
-            customerRepository = new Models.CustomerRepository();
+            customerRepository = new Models.CustomerRepository(databaseContext);
 
             _logger = logger;
         }
 
-        [HttpPost, Route("addnewcustomer")]
-        public IActionResult AddCustomer(Customer customer)
+        [HttpGet]
+        public IEnumerable<Customer> GetAllCustomers()
         {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogInformation("Add customer called - Failed");
-                return BadRequest(ModelState);
-
-            }
-            else
-            {
-                customerRepository.AddCustomer(customer, databaseContext);
-
-                _logger.LogInformation("Add customer called - Success");
-
-                return Ok(customer.Id);
-            }
-        }
-
-        [HttpGet, Route("getallcustomers")]
-        public List<Customer> GetAllCustomers()
-        {
-            var listOfCustomers = GetCustomerList();
+            var listOfCustomers = customerRepository.GetAllCustomers();
 
             _logger.LogInformation("Get all called");
 
             return listOfCustomers;
         }
 
-        public List<Customer> GetCustomerList()
+        [HttpPost]
+        public IActionResult AddCustomer(Customer customer)
         {
-            return databaseContext.GetAllCustomers();
+            if (!ModelState.IsValid)
+            {
+                _logger.LogInformation("AddCustomer called - Failed");
+                return BadRequest(ModelState);
+            }
+            else
+            {
+                customerRepository.AddCustomer(customer);
+
+                _logger.LogInformation("AddCustomer called - Success");
+
+                return Ok(customer.Id);
+            }
         }
 
-        [HttpGet, Route("getusingid")]
+        [HttpGet, Route("{id}")]
         public IActionResult GetUsingId(int id)
         {
-            var customer = customerRepository.GetCustomerById(id, databaseContext);
+            var customer = customerRepository.GetCustomerById(id);
 
             if (customer != null)
             {
@@ -76,58 +68,64 @@ namespace Kundregister.Controllers
 
             else return NotFound($"A customer with the Id {id} was not found");
         }
+
         public string CapitalizeFirstLetterWithoutTouchingTheRest(string input)
         {
             var output = char.ToUpper(input[0]) + input.Substring(1);
             return output;
         }
 
-        [HttpPost, Route("editcustomer")]
+        [HttpPost, Route("{pk}")]
         public IActionResult EditCustomer(string name, string pk, string value)
         {
             var selectedId = int.Parse(pk);
-            var customerToEdit = customerRepository.GetCustomerById(selectedId, databaseContext);
+            var customerToEdit = customerRepository.GetCustomerById(selectedId);
 
             string capitalizedPropertyName = CapitalizeFirstLetterWithoutTouchingTheRest(name);
 
-            customerRepository.UpdateCustomer(customerToEdit, capitalizedPropertyName, value, databaseContext);
+            bool worked = customerRepository.UpdateCustomer(customerToEdit, capitalizedPropertyName, value);
 
-            databaseContext.SaveChanges();
-            return Ok($"Updated {capitalizedPropertyName} of id: {customerToEdit.Id} to {value}");
+            if (worked)
+            {
+                databaseContext.SaveChanges();
+                return Ok($"Updated {capitalizedPropertyName} of id: {customerToEdit.Id} to {value}");
+            }
+
+            else return BadRequest("incorrect value");
         }
 
-        [HttpPost, Route("deletecustomer")]
+        [HttpDelete, Route("{id}")]
         public IActionResult DeleteCustomer(int id)
         {
-            var customerToRemove = customerRepository.GetCustomerById(id, databaseContext);
-            customerRepository.RemoveCustomer(customerToRemove, databaseContext);
+            var customerToRemove = customerRepository.GetCustomerById(id);
+            customerRepository.RemoveCustomer(customerToRemove);
 
             return Ok("Customer removed");
         }
 
-        [HttpGet, Route("countcustomers")]
+        [HttpGet, Route("count")]
         public IActionResult CountCustomers()
         {
-            return Ok(databaseContext.GetAllCustomers().Count());
+            return Ok(databaseContext.Customers.Count());
         }
 
-        [HttpGet, Route("seedcustomers")]
+        [HttpGet, Route("seed")]
         public IActionResult SeedCustomers()
         {
             string dataLocation = "wwwroot/data.txt";
 
-            customerRepository.SeedCustomers(dataLocation, databaseContext);
+            customerRepository.SeedCustomers(dataLocation);
 
             return Ok("seeded database");
         }
 
-        [HttpGet, Route("showcustomeraddresses")]
-        public List<Address> ShowCustomerAddresses(int id)
+        [HttpGet, Route("{id}/address")]
+        public IEnumerable<Address> ShowCustomerAddresses(int id)
         {
-            return databaseContext.GetAllAddresses(id);
+            return databaseContext.GetAllAddressesForGivenCustomerId(id);
         }
 
-        [HttpPost, Route("addnewaddress")]
+        [HttpPost, Route("{id}/address")]
         public IActionResult AddNewAddress(int id)
         {
             Address newAddress = new Address
@@ -137,6 +135,7 @@ namespace Kundregister.Controllers
                 StreetName = "AAA",
                 StreetNumber = 111
             };
+
             databaseContext.Add(newAddress);
             databaseContext.SaveChanges();
 
@@ -147,25 +146,34 @@ namespace Kundregister.Controllers
                 AdressId = newAddressId,
                 CustId = id
             };
+
             databaseContext.Add(relation);
             databaseContext.SaveChanges();
 
             return Ok("new address added");
         }
 
-        [HttpPost, Route("deleteaddress")]
-        public IActionResult DeleteAddress(int custId, int addressId)
+        [HttpDelete, Route("{custId}/address/{addressId}")]
+        public IActionResult RemoveAddress(int custId, int addressId)
         {
+            RemoveRelationsWithAddressId(addressId);
             var addressToRemove = databaseContext.Addresses.Single(address => address.Id == addressId);
+            databaseContext.Remove(addressToRemove);
+            databaseContext.SaveChanges();
+
+            return Ok("address and all relations removed");
+        }
+
+        [HttpDelete, Route("address/{addressId}")]
+        private IActionResult RemoveRelationsWithAddressId(int addressId)
+        {
             var relationsToRemove = databaseContext.Relations.Where(relation => relation.AdressId == addressId);
             foreach (var relation in relationsToRemove)
             {
                 databaseContext.Remove(relation);
             }
-            databaseContext.Remove(addressToRemove);
-            databaseContext.SaveChanges();
 
-            return Ok("address and all relations removed");
+            return Ok("Relations removed");
         }
     }
 }

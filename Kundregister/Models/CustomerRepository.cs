@@ -8,33 +8,39 @@ namespace Kundregister.Models
 {
     public class CustomerRepository : ICustomerRepository
     {
-        public void AddCustomer(Customer newCustomer, DatabaseContext databaseContext)
+        private DatabaseContext databaseContext;
+
+        public CustomerRepository(DatabaseContext databaseContext)
+        {
+            this.databaseContext = databaseContext;
+        }
+        public void AddCustomer(Customer newCustomer)
         {
             newCustomer.DateCreated = DateTime.Now;
             databaseContext.Add(newCustomer);
             databaseContext.SaveChanges();
         }
 
-        public IEnumerable<Customer> GetAllCustomers(DatabaseContext databaseContext)
+        public IEnumerable<Customer> GetAllCustomers()
         {
-            return databaseContext.GetAllCustomers();
+            return databaseContext.Customers;
         }
 
-        public Customer GetCustomerById(int idOfCustomer, DatabaseContext databaseContext)
+        public Customer GetCustomerById(int idOfCustomer)
         {
-            var listOfCustomers = GetAllCustomers(databaseContext);
+            var listOfCustomers = GetAllCustomers();
             return databaseContext.GetCustomerById(idOfCustomer);
         }
 
-        public void RemoveCustomer(Customer customerToRemove, DatabaseContext databaseContext)
+        public void RemoveCustomer(Customer customerToRemove)
         {
             databaseContext.Remove(customerToRemove);
             databaseContext.SaveChanges();
         }
 
-        public void SeedCustomers(string fileLocation, DatabaseContext databaseContext)
+        public void SeedCustomers(string fileLocation)
         {
-            var customers = getCustomersFromTextFile(fileLocation);
+            var customers = GetCustomersFromTextFile(fileLocation);
 
             databaseContext.Customers.RemoveRange(databaseContext.Customers);
             databaseContext.Addresses.RemoveRange(databaseContext.Addresses);
@@ -44,7 +50,7 @@ namespace Kundregister.Models
             databaseContext.SaveChanges();
         }
 
-        private List<Customer> getCustomersFromTextFile(string fileLocation)
+        private IEnumerable<Customer> GetCustomersFromTextFile(string fileLocation)
         {
             var dataSet = System.IO.File.ReadAllLines(fileLocation);
 
@@ -66,15 +72,23 @@ namespace Kundregister.Models
             return customers;
         }
 
-        public void UpdateCustomer(Customer CustomerToEdit, string nameOfThePropertyToUpdateTheValueOf, string newValue, DatabaseContext databaseContext)
+        public bool UpdateCustomer(Customer customerToEdit, string nameOfThePropertyToUpdateTheValueOf, string newValue)
         {
-            CustomerToEdit.DateEdited = DateTime.Now;
+            customerToEdit.DateEdited = DateTime.Now;
 
-            var property = CustomerToEdit.GetType().GetProperties()
+            var property = customerToEdit.GetType().GetProperties()
                 .SingleOrDefault(prop => prop.Name.Equals(nameOfThePropertyToUpdateTheValueOf));
 
-            if (property.PropertyType == typeof(int)) property.SetValue(CustomerToEdit, int.Parse(newValue));
-            else property.SetValue(CustomerToEdit, newValue);
+            bool worked = true;
+
+            if (property.PropertyType == typeof(int))
+            {
+                worked = int.TryParse(newValue, out int parsedValue);
+                if(worked) property.SetValue(customerToEdit, parsedValue);
+            }
+            else property.SetValue(customerToEdit, newValue);
+
+            return worked;
         }
     }
 }
