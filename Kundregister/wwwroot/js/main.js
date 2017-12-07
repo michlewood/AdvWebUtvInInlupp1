@@ -54,10 +54,10 @@ $("#getOneCustomer").click(function () {
         method: 'GET'
     })
         .done(function (result) {
-            if (idNumber == "") {
+            if (idNumber === "") {
                 $("#status").text(`Please enter a number`);
             }
-            else if (result.length == 1) {
+            else if (result.length === 1) {
                 $("#status").text(`A customer with the Id ${idNumber} was not found`);
             }
             else {
@@ -90,8 +90,8 @@ $("#getAllCustomers").click(function () {
                 + '<th scope= "col">Adress</th>'
                 + '<th scope= "col">Delete</th>'
                 + '</tr ></thead ><tbody>';
-            if (result.length == 0) {
-                generatedResult += '<h2>No customers</h2>'
+            if (result.length === 0) {
+                generatedResult += '<h2>No customers</h2>';
             }
 
             else {
@@ -196,7 +196,7 @@ $("#getAllCustomers").click(function () {
             });
         })
 
-        .fail(function (xhr, status, error) {s
+        .fail(function (xhr, status, error) {
             $("#status").text(xhr.responseText);
             $('#status').append("<hr />");
         });
@@ -232,7 +232,7 @@ function AddressFunctions(customerId) {
         type: 'text',
         url: `/api/customers/${customerId}/address/${this.id}`,
         success: function (response) {
-            $("#status").html(response)
+            $("#status").html(response);
         },
         fail: function (response) {
             $("#status").html(response);
