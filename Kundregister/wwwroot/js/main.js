@@ -27,7 +27,7 @@ $("#addForm button").click(function () {
         }
     })
         .done(function (result) {
-            $("#getAll").click();
+            $("#getAllCustomers").click();
             console.log("Success!", result);
             $('#status').text("new customer created");
             $('#status').append("<hr />");
@@ -130,7 +130,7 @@ $("#getAllCustomers").click(function () {
                     method: 'DELETE'
 
                 }).done(function () {
-                    $("#getAll").click();
+                    $("#getAllCustomers").click();
                     $("#status").text("customer deleted");
                     $('#status').append("<hr />");
                 });
@@ -246,7 +246,7 @@ $("#seedCustomers").click(function () {
         method: 'GET'
     })
         .done(function (result) {
-            $("#getAll").click();
+            $("#getAllCustomers").click();
             $("#status").text(result);
             $('#status').append("<hr />");
         })
