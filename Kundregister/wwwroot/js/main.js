@@ -14,37 +14,70 @@ $("#countCustomers").click(function () {
 });
 
 $("#addForm button").click(function () {
-
-    $.ajax({
-        url: '/api/customers',
-        method: 'POST',
-        data: {
-            "FirstName": $("#addForm [name=FirstName]").val(),
-            "LastName": $("#addForm [name=LastName]").val(),
-            "Age": $("#addForm [name=Age]").val(),
-            "Gender": $("#addForm [name=Gender]").val(),
-            "Email": $("#addForm [name=Email]").val()
-        }
-    })
-        .done(function (result) {
-            $("#getAll").click();
-            console.log("Success!", result);
-            $('#status').text("new customer created");
-            $('#status').append("<hr />");
+    if (this.parentNode.parentNode.parentNode.parentNode.parentNode.className == "customer") {
+        $.ajax({
+            url: '/api/customers',
+            method: 'POST',
+            data: {
+                "FirstName": $("#addForm [name=FirstName]").val(),
+                "LastName": $("#addForm [name=LastName]").val(),
+                "Age": $("#addForm [name=Age]").val(),
+                "Gender": $("#addForm [name=Gender]").val(),
+                "Email": $("#addForm [name=Email]").val()
+            }
         })
+            .done(function (result) {
+                $("#getAllCustomers").click();
+                console.log("Success!", result);
+                $('#status').text("new customer created");
+                $('#status').append("<hr />");
+            })
 
-        .fail(function (xhr, status, error) {
-            let errorMessages = xhr.responseJSON;
-            let concatinatedErrorMessage = "";
+            .fail(function (xhr, status, error) {
+                let errorMessages = xhr.responseJSON;
+                let concatinatedErrorMessage = "";
 
-            $.each(errorMessages, function (index, item) {
-                concatinatedErrorMessage += `${item[0]} `;
+                $.each(errorMessages, function (index, item) {
+                    concatinatedErrorMessage += `${item[0]} `;
+                });
+                $("#status").text(concatinatedErrorMessage);
+                $('#status').append("<hr />");
+                console.log("Error", xhr, status, error);
             });
-            $("#status").text(concatinatedErrorMessage);
-            $('#status').append("<hr />");
-            console.log("Error", xhr, status, error);
-        });
+    }
+    else if (this.parentNode.parentNode.parentNode.parentNode.parentNode.className = "address") {
+        $.ajax({
+            url: '/api/address',
+            method: 'POST',
+            data: {
+                "StreetName": $("#addForm [name=StreetName]").val(),
+                "StreetNumber": $("#addForm [name=StreetNumber]").val(),
+                "PostalCode": $("#addForm [name=PostalCode]").val(),
+                "Area": $("#addForm [name=Area]").val()
+            }
+        })
+            .done(function (result) {
+                $("#getAllAddresses").click();
+                console.log("Success!", result);
+                $('#status').text("new address created");
+                $('#status').append("<hr />");
+            })
+
+            .fail(function (xhr, status, error) {
+                let errorMessages = xhr.responseJSON;
+                let concatinatedErrorMessage = "";
+
+                $.each(errorMessages, function (index, item) {
+                    concatinatedErrorMessage += `${item[0]} `;
+                });
+                $("#status").text(concatinatedErrorMessage);
+                $('#status').append("<hr />");
+                console.log("Error", xhr, status, error);
+            });
+    }
+    else console.log("error");
 });
+
 
 $("#getOneCustomer").click(function () {
     let idNumber = $("#idNumber").val();
@@ -104,7 +137,7 @@ $("#getAllCustomers").click(function () {
                         `<td><a href="#" class="edit" data-name="gender" data-type="text" data-pk="${item.id}" data-title="Enter Gender">${item.gender}</a></td>` +
                         `<td><a href="#" class="edit" data-name="email" data-type="text" data-pk="${item.id}" data-title="Enter Email">${item.email}</a></td>` +
                         `<td><a href="#" class="edit" data-name="age" data-type="text" data-pk="${item.id}" data-title="Enter Age">${item.age}</a></td>` +
-                        `<td><a href="#" class="address" id="${item.id}" data-title="Address"><button class="btn btn-info">A</button></a></td>` +
+                        `<td><a href="#" class="addressModule" id="${item.id}" data-title="Address"><button class="btn btn-info">A</button></a></td>` +
                         `<td><a href="#" class="delete" id="${item.id}" data-title="Delete"><button class="btn btn-danger">X</button></a></td>` +
                         '</tr>';
                 });
@@ -130,13 +163,13 @@ $("#getAllCustomers").click(function () {
                     method: 'DELETE'
 
                 }).done(function () {
-                    $("#getAll").click();
+                    $("#getAllCustomers").click();
                     $("#status").text("customer deleted");
                     $('#status').append("<hr />");
                 });
             });
 
-            $(".address").click(function () {
+            $(".addressModule").click(function () {
                 let idForCustomer = this.id;
 
                 console.log(this.id);
@@ -185,39 +218,61 @@ $("#getAllCustomers").click(function () {
                         + '</table >'
                         + '</div >'
                         + '<div class="modal-footer">'
-                        + '<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>'
+                        + '<div class="test">';
+
+
+
+                    modalContent += '</div>'
                         + '<button type="button" class="btn btn-primary newAddress">Add New</button>'
                         + '</div></div></div>';
                     $("#addressModal").html(modalContent);
                     $("#addressModal").modal(show = true);
-
+                    getAddresses(idForCustomer);
                     AddressFunctions(idForCustomer);
+
+                    $(".newAddress").click(function () {
+                        $.ajax({
+                            url: `/api/customer/${idForCustomer}/address/${selectedAddress.id}`, // Does not work
+                            method: 'Post'
+                        })
+                            .done(function (result) {
+                                $("#status").text(result);
+                                $('#status').append("<hr />");
+                            })
+                            .fail(function (result) {
+                                $("#status").text(result);
+                                $('#status').append("<hr />");
+                            })
+                    });
                 });
             });
         })
 
-        .fail(function (xhr, status, error) {s
+        .fail(function (xhr, status, error) {
+            s
             $("#status").text(xhr.responseText);
             $('#status').append("<hr />");
         });
 });
 
-function AddressFunctions(customerId) {
-    $(".newAddress").click(function () {
-        console.log(customerId);
-        $.ajax({
-            url: `api/customers/${customerId}/address`,
-            method: 'POST'
-        })
-            .done(function (result) {
-                $("#status").text(result);
-                $('#status').append("<hr />");
+function getAddresses(customerId) {
+    $.ajax({
+        url: '/api/address',
+        method: 'GET'
+    })
+        .done(function (result) {
+            let test = '<select id="selectedAddress">'
+            $.each(result, function (index, item) {
+                test += `<option value= "${item}">${item.streetName} ${item.streetNumber}</option >`
             });
-    });
+            test += '</select>';
+            $(".test").html(test);
+        });
+}
 
+function AddressFunctions(customerId) {
     $(".addressDelete").click(function () {
         let idOfAddress = this.id;
-        console.log(idOfAddress);
         $.ajax({
             url: `api/customers/${customerId}/address/${idOfAddress}`,
             method: 'DELETE'
@@ -230,7 +285,7 @@ function AddressFunctions(customerId) {
 
     $(".editAddress").editable({
         type: 'text',
-        url: `/api/customers/${customerId}/address/${this.id}`,
+        url: `/api/address/${this.id}`,
         success: function (response) {
             $("#status").html(response)
         },
@@ -246,12 +301,77 @@ $("#seedCustomers").click(function () {
         method: 'GET'
     })
         .done(function (result) {
-            $("#getAll").click();
+            $("#getAllCustomers").click();
             $("#status").text(result);
             $('#status').append("<hr />");
         })
 
         .fail(function (xhr, status, error) {
+            $("#status").text(xhr.responseText);
+            $('#status').append("<hr />");
+        });
+});
+
+$("#getAllAddresses").click(function () {
+    $.ajax({
+        url: '/api/address',
+        method: 'GET'
+    })
+        .done(function (result) {
+            let generatedResult = '<table class="table table-sm table-dark table-striped"><thead><tr>'
+                + '<th scope= "col">#</th>'
+                + '<th scope= "col">Street Name</th>'
+                + '<th scope= "col">Street Number</th>'
+                + '<th scope= "col">Postal Code</th>'
+                + '<th scope= "col">Area</th>'
+                + '</tr ></thead ><tbody>';
+            if (result.length == 0) {
+                generatedResult += '<h2>No Addresses</h2>'
+            }
+
+            else {
+                $.each(result, function (index, item) {
+                    console.log(item);
+                    generatedResult += '<tr id="customerNumber' + (index + 1) + '">' +
+                        `<th scope="row">${item.id}</th>` +
+                        `<td><a href="#" class="edit" data-name="streetName" data-type="text" data-pk="${item.id}" data-title="Enter Street Name">${item.streetName}</a></td>` +
+                        `<td><a href="#" class="edit" data-name="streetNumber" data-type="text" data-pk="${item.id}" data-title="Enter Street Number">${item.streetNumber}</a></td>` +
+                        `<td><a href="#" class="edit" data-name="postalCode" data-type="text" data-pk="${item.id}" data-title="Enter Postal Code">${item.postalCode}</a></td>` +
+                        `<td><a href="#" class="edit" data-name="area" data-type="text" data-pk="${item.id}" data-title="Enter Area">${item.area}</a></td>` +
+                        `<td><a href="#" class="delete" id="${item.id}" data-title="Delete"><button class="btn btn-danger">X</button></a></td>` +
+                        '</tr>';
+                });
+            }
+
+            generatedResult += "</tbody ></table >";
+
+            $("#dataTable").html(generatedResult);
+
+            $(".edit").editable({
+                type: 'text',
+                url: `/api/address/${this.id}`,
+                fail: function (response) {
+                    console.log(response);
+                }
+            });
+
+            $(".delete").click(function () {
+                let deleteId = this.id;
+                console.log(deleteId);
+                $.ajax({
+                    url: `/api/address/${deleteId}`,
+                    method: 'DELETE'
+
+                }).done(function () {
+                    $("#getAllAddresses").click();
+                    $("#status").text("address deleted");
+                    $('#status').append("<hr />");
+                });
+            });
+        })
+
+        .fail(function (xhr, status, error) {
+            s
             $("#status").text(xhr.responseText);
             $('#status').append("<hr />");
         });

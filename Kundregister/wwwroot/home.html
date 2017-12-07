@@ -10,33 +10,63 @@
 <body>
     <div class="container">
         <br />
-        <div id="addForm">
-            <table>
-                <tr>
-                    <td><label>Förnamn:</label></td>
-                    <td><input name="FirstName" value="Sven" style="width:150px" /></td>
+        <table>
+            <tr>
+                <td class="col-md-5">
+                    <div id="addForm" class="customer">
+                        <table>
+                            <tr>
+                                <td><label>Förnamn:</label></td>
+                                <td class="col-md-1"><input name="FirstName" value="Sven" style="width:150px" /></td>
 
-                    <td><label>Efternamn:</label></td>
-                    <td><input name="LastName" value="Sven" style="width:150px" /></td>
-                </tr>
-                <tr>
-                    <td><label>Ålder:</label></td>
-                    <td><input name="Age" value="Sven" style="width:150px" /></td>
+                                <td><label>Efternamn:</label></td>
+                                <td class="col-md-1"><input name="LastName" value="Sven" style="width:150px" /></td>
+                            </tr>
+                            <tr>
+                                <td><label>Ålder:</label></td>
+                                <td class="col-md-1"><input name="Age" value="Sven" style="width:150px" /></td>
 
-                    <td><label>Kön:</label></td>
-                    <td><input name="Gender" value="Sven" style="width:150px" /></td>
-                </tr>
-                <tr>
-                    <td><label>Email:</label></td>
-                    <td><input name="Email" value="Sven" style="width:150px" /></td>
+                                <td><label>Kön:</label></td>
+                                <td class="col-md-1"><input name="Gender" value="Sven" style="width:150px" /></td>
+                            </tr>
+                            <tr>
+                                <td><label>Email:</label></td>
+                                <td class="col-md-1"><input name="Email" value="Sven" style="width:150px" /></td>
 
-                    <td></td>
+                                <td></td>
 
-                    <td><button class="btn btn-primary" style="width:150px">Ok</button></td>
-                </tr>
-            </table>
-        </div>
+                                <td class="col-md-1"><button class="btn btn-primary" style="width:150px">Ok</button></td>
+                            </tr>
+                        </table>
+                    </div>
+                </td>
+                <td>
+                    <div id="addForm" class="address">
+                        <table>
+                            <tr>
+                                <td><label>Street Name:</label></td>
+                                <td class="col-md-0"><input name="StreetName" value="Sven" style="width:150px" /></td>
 
+                                <td><label>Street Number:</label></td>
+                                <td class="col-md-0"><input name="StreetNumber" value="Sven" style="width:150px" /></td>
+                            </tr>
+                            <tr>
+                                <td><label>Postal Code:</label></td>
+                                <td class="col-md-0"><input name="PostalCode" value="Sven" style="width:150px" /></td>
+
+                                <td><label>Area:</label></td>
+                                <td class="col-md-0"><input name="Area" value="Sven" style="width:150px" /></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <button class="btn btn-primary" style="width:150px">Ok</button>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+        </table>
         <hr />
 
         <label>Enter an Id</label>
@@ -44,11 +74,13 @@
 
         <hr />
 
-        <button id="getOneCustomer" class="btn btn-success" style="width:200px">Get by Id</button>
-        <button id="getAllCustomers" class="btn btn-success" style="width:200px">Get All</button>
+        <button id="getOneCustomer" class="btn btn-success" style="width:200px">Get a Customer by Id</button>
+        <button id="getAllCustomers" class="btn btn-success" style="width:200px">Get All Customers</button>
         <!--<br />-->
         <button id="countCustomers" class="btn btn-info" style="width:200px">Count</button>
         <button id="seedCustomers" class="btn btn-warning" style="width:200px">Seed</button>
+        <hr />
+        <button id="getAllAddresses" class="btn btn-success" style="width:200px">Get All Addresses</button>
         <hr />
         <span id="status"></span>
         <div id="dataTable"></div>
