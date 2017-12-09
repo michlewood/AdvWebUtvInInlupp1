@@ -14,7 +14,8 @@ $("#countCustomers").click(function () {
 });
 
 $("#addForm button").click(function () {
-    if (this.parentNode.parentNode.parentNode.parentNode.parentNode.className == "customer") {
+    console.log(this);
+    if (this.IdName == "customerButton") {
         $.ajax({
             url: '/api/customers',
             method: 'POST',
@@ -45,7 +46,7 @@ $("#addForm button").click(function () {
                 console.log("Error", xhr, status, error);
             });
     }
-    else if (this.parentNode.parentNode.parentNode.parentNode.parentNode.className = "address") {
+    else if (this.IdName = "addressButton") {
         $.ajax({
             url: '/api/address',
             method: 'POST',
@@ -227,13 +228,20 @@ $("#getAllCustomers").click(function () {
                         + '</div></div></div>';
                     $("#addressModal").html(modalContent);
                     $("#addressModal").modal(show = true);
-                    getAddresses(idForCustomer);
+                    valueOfSelectedAddress = null;
+                    getAddressSelectMenu(idForCustomer);
                     AddressFunctions(idForCustomer);
 
+
                     $(".newAddress").click(function () {
+                        console.log(valueOfSelectedAddress);
                         $.ajax({
-                            url: `/api/customer/${idForCustomer}/address/${selectedAddress.id}`, // Does not work
-                            method: 'Post'
+                            url: `/api/customers/${idForCustomer}/address/${valueOfSelectedAddress}`,
+                            method: 'POST',
+                            data: {
+                                "custId": idForCustomer,
+                                "AdressId": valueOfSelectedAddress
+                            }
                         })
                             .done(function (result) {
                                 $("#status").text(result);
@@ -244,6 +252,9 @@ $("#getAllCustomers").click(function () {
                                 $('#status').append("<hr />");
                             })
                     });
+
+
+
                 });
             });
         })
@@ -255,19 +266,27 @@ $("#getAllCustomers").click(function () {
         });
 });
 
-function getAddresses(customerId) {
+let valueOfSelectedAddress;
+
+function getAddressSelectMenu(customerId) {
     $.ajax({
         url: '/api/address',
         method: 'GET'
     })
         .done(function (result) {
-            let test = '<select id="selectedAddress">'
+            let test = '<select id="selectedAddress" onchange="changeValue(this)">>'
+                + '<option>select one</option>';
             $.each(result, function (index, item) {
-                test += `<option value= "${item}">${item.streetName} ${item.streetNumber}</option >`
+                test += `<option value= "${item.id}">${item.streetName} ${item.streetNumber}</option >`
             });
             test += '</select>';
             $(".test").html(test);
         });
+}
+
+function changeValue(selectObject) {
+    valueOfSelectedAddress = selectObject.value;
+    console.log(valueOfSelectedAddress);
 }
 
 function AddressFunctions(customerId) {

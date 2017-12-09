@@ -134,24 +134,26 @@ namespace Kundregister.Controllers
         }
 
         [HttpPost, Route("{custId}/address/{addressId}")]
-        public IActionResult AddRelationsBetweenCustomerAndAddress(int custId, int addressId)
+        public IActionResult AddRelationsBetweenCustomerAndAddress(CustomerToAddressRelations newRelation)
         {
-            var newRelation = new CustomerToAddressRelations
+            if (ModelState.IsValid)
             {
-                CustId = custId,
-                AdressId = addressId
-            };
-            if (databaseContext.Relations.Any(relation => relation.CustId == custId && relation.AdressId == addressId))
-            {
-                _logger.LogInformation("AddRelationsBetweenCustomerAndAddress called - Failed");
-                return BadRequest("Relation already exists");
+                if (databaseContext.Relations.Any(relation => relation.CustId == newRelation.CustId && relation.AdressId == newRelation.AdressId))
+                {
+                    _logger.LogInformation("AddRelationsBetweenCustomerAndAddress called - Failed");
+                    return BadRequest("Relation already exists");
+                }
+                else
+                {
+                    databaseContext.Add(newRelation);
+                    databaseContext.SaveChanges();
+                    _logger.LogInformation("AddRelationsBetweenCustomerAndAddress called - Success");
+                    return Ok("Relations Created");
+                }
             }
             else
             {
-                databaseContext.Add(newRelation);
-                databaseContext.SaveChanges();
-                _logger.LogInformation("AddRelationsBetweenCustomerAndAddress called - Success");
-                return Ok("Relations Created");
+                return BadRequest("Invalid Input");
             }
         }
 
