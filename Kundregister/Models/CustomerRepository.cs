@@ -72,8 +72,10 @@ namespace Kundregister.Models
             return customers;
         }
 
-        public bool UpdateCustomer(Customer customerToEdit, string nameOfThePropertyToUpdateTheValueOf, string newValue)
+        public bool UpdateCustomer(int id, string nameOfThePropertyToUpdateTheValueOf, string newValue)
         {
+            var customerToEdit = GetCustomerById(id); 
+
             customerToEdit.DateEdited = DateTime.Now;
 
             var property = customerToEdit.GetType().GetProperties()
@@ -87,7 +89,7 @@ namespace Kundregister.Models
                 if(worked) property.SetValue(customerToEdit, parsedValue);
             }
             else property.SetValue(customerToEdit, newValue);
-
+            databaseContext.SaveChanges();
             return worked;
         }
 
@@ -117,6 +119,18 @@ namespace Kundregister.Models
         public IEnumerable<Address> GetCustomerAddresses(int id)
         {
             return databaseContext.GetAllAddressesForGivenCustomerId(id);
+        }
+
+        public CustomerToAddressRelations GetRelationByCustIdAndAddressId(int custId, int addressId)
+        {
+            return databaseContext.Relations.SingleOrDefault(relation => relation.CustId == custId && relation.AdressId == addressId);
+        }
+
+        public void AddRelationsBetweenCustomerAndAddress(CustomerToAddressRelations newRelation)
+        {
+            GetCustomerById(newRelation.CustId).DateEdited = DateTime.Now;
+            databaseContext.Add(newRelation);
+            databaseContext.SaveChanges();
         }
     }
 }

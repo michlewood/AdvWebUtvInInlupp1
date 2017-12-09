@@ -88,16 +88,15 @@ namespace Kundregister.Controllers
         public IActionResult EditCustomer(string name, string pk, string value)
         {
             var selectedId = int.Parse(pk);
-            var customerToEdit = customerRepository.GetCustomerById(selectedId);
-
+            
             string capitalizedPropertyName = CapitalizeFirstLetterWithoutTouchingTheRest(name);
 
-            bool worked = customerRepository.UpdateCustomer(customerToEdit, capitalizedPropertyName, value);
+            bool worked = customerRepository.UpdateCustomer(selectedId, capitalizedPropertyName, value);
 
             if (worked)
             {
                 _logger.LogInformation("EditCustomer called - Success");
-                return Ok($"Updated {capitalizedPropertyName} of id: {customerToEdit.Id} to {value}");
+                return Ok($"Updated {capitalizedPropertyName} of id: {selectedId} to {value}");
             }
 
             else
@@ -147,21 +146,20 @@ namespace Kundregister.Controllers
         {
             if (ModelState.IsValid)
             {
-                if (databaseContext.Relations.Any(relation => relation.CustId == addRelationVM.CustId && relation.AdressId == addRelationVM.AddressId))
+                if (customerRepository.GetRelationByCustIdAndAddressId(addRelationVM.CustId, addRelationVM.AddressId) != null)
                 {
                     _logger.LogInformation("AddRelationsBetweenCustomerAndAddress called - Failed");
                     return BadRequest("Relation already exists");
                 }
                 else
                 {
-                    customerRepository.GetCustomerById(addRelationVM.CustId).DateEdited = DateTime.Now;
                     var newRelation = new CustomerToAddressRelations
                     {
                         CustId = addRelationVM.CustId,
                         AdressId = addRelationVM.AddressId
                     };
-                    databaseContext.Add(newRelation);
-                    databaseContext.SaveChanges();
+                    customerRepository.AddRelationsBetweenCustomerAndAddress(newRelation);
+                    
                     _logger.LogInformation("AddRelationsBetweenCustomerAndAddress called - Success");
                     return Ok("Relations Created");
                 }

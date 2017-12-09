@@ -79,7 +79,6 @@ $("#addForm button").click(function () {
     else console.log("error");
 });
 
-
 $("#getOneCustomer").click(function () {
     let idNumber = $("#idNumber").val();
     console.log(idNumber);
@@ -169,6 +168,7 @@ $("#getAllCustomers").click(function () {
                     $('#status').append("<hr />");
                 });
             });
+            let addressesForACustomer;
 
             $(".addressModule").click(function () {
                 let idForCustomer = this.id;
@@ -179,6 +179,7 @@ $("#getAllCustomers").click(function () {
                     method: 'GET'
 
                 }).done(function (result) {
+                    addressesForACustomer = result;
                     let modalContent = '<div class="modal-dialog" role="document">'
                         + '<div class="modal-content">'
                         + '<div class="modal-header">'
@@ -229,7 +230,7 @@ $("#getAllCustomers").click(function () {
                     $("#addressModal").html(modalContent);
                     $("#addressModal").modal(show = true);
                     valueOfSelectedAddress = null;
-                    getAddressSelectMenu(idForCustomer);
+                    getAddressSelectMenu(idForCustomer, addressesForACustomer);
                     AddressFunctions(idForCustomer);
 
 
@@ -268,7 +269,8 @@ $("#getAllCustomers").click(function () {
 
 let valueOfSelectedAddress;
 
-function getAddressSelectMenu(customerId) {
+function getAddressSelectMenu(customerId, addressesForACustomer) {
+    console.log(addressesForACustomer);
     $.ajax({
         url: '/api/address',
         method: 'GET'
@@ -277,7 +279,13 @@ function getAddressSelectMenu(customerId) {
             let test = '<select id="selectedAddress" onchange="changeValue(this)">>'
                 + '<option>select one</option>';
             $.each(result, function (index, item) {
-                test += `<option value= "${item.id}">${item.streetName} ${item.streetNumber}</option >`
+                var noPreviousRelation = false;
+                $.each(addressesForACustomer, function (index, alreadyOnCustomer) {
+                    if (alreadyOnCustomer.id == item.id) {
+                        noPreviousRelation = true; return;
+                    }
+                });
+                if (!noPreviousRelation) test += `<option value= "${item.id}">${item.streetName} ${item.streetNumber}</option >`
             });
             test += '</select>';
             $(".test").html(test);

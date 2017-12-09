@@ -12,9 +12,15 @@ namespace Kundregister.Models
         Customer GetCustomerById(int id);
         void AddCustomer(Customer newCustomer);
         void RemoveCustomer(Customer customerToRemove);
-        bool UpdateCustomer(Customer customerToEdit, string nameOfPropertyToUpdateValue, string newValue);
+        bool UpdateCustomer(int id, string nameOfPropertyToUpdateValue, string newValue);
         void SeedCustomers(string dataLocation);
         int CountCustomers();
+
         IEnumerable<Address> GetCustomerAddresses(int id);
+
+        CustomerToAddressRelations GetRelationByCustIdAndAddressId(int custId, int addressId);
+        void AddRelationsBetweenCustomerAndAddress(CustomerToAddressRelations newRelation);
+
+
     }
 }
