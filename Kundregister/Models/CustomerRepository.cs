@@ -105,7 +105,18 @@ namespace Kundregister.Models
             }
             else property.SetValue(addressToEdit, newValue);
 
+            databaseContext.SaveChanges();
             return worked;
+        }
+
+        public int CountCustomers()
+        {
+            return databaseContext.Customers.Count();
+        }
+
+        public IEnumerable<Address> GetCustomerAddresses(int id)
+        {
+            return databaseContext.GetAllAddressesForGivenCustomerId(id);
         }
     }
 }

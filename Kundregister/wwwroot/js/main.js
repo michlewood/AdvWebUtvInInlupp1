@@ -15,7 +15,7 @@ $("#countCustomers").click(function () {
 
 $("#addForm button").click(function () {
     console.log(this);
-    if (this.IdName == "customerButton") {
+    if (this.id == "customerButton") {
         $.ajax({
             url: '/api/customers',
             method: 'POST',
@@ -46,7 +46,7 @@ $("#addForm button").click(function () {
                 console.log("Error", xhr, status, error);
             });
     }
-    else if (this.IdName = "addressButton") {
+    else if (this.id == "addressButton") {
         $.ajax({
             url: '/api/address',
             method: 'POST',

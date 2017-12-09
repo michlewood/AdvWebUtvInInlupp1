@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Kundregister.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Kundregister.Models;
 
 namespace Kundregister.Controllers
 {
@@ -13,12 +14,12 @@ namespace Kundregister.Controllers
     {
         private readonly ILogger<AddressController> _logger;
         private DatabaseContext databaseContext;
-        private Models.CustomerRepository customerRepository;
+        private CustomerRepository customerRepository;
 
         public AddressController(DatabaseContext databaseContext, ILogger<AddressController> logger)
         {
             this.databaseContext = databaseContext;
-            customerRepository = new Models.CustomerRepository(databaseContext);
+            customerRepository = new CustomerRepository(databaseContext);
 
             _logger = logger;
         }
@@ -34,9 +35,8 @@ namespace Kundregister.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddAddress(Address address)
+        public IActionResult AddAddress(AddAddressVM addAddressVM)
         {
-
             if (!ModelState.IsValid)
             {
                 _logger.LogInformation("AddAddress called - Failed");
@@ -44,12 +44,19 @@ namespace Kundregister.Controllers
             }
             else
             {
-                databaseContext.Add(address);
+                var newAddress = new Address
+                {
+                    StreetName = addAddressVM.StreetName,
+                    StreetNumber = addAddressVM.StreetNumber,
+                    PostalCode = addAddressVM.PostalCode,
+                    Area = addAddressVM.Area
+                };
+                databaseContext.Add(newAddress);
                 databaseContext.SaveChanges();
 
                 _logger.LogInformation("AddAddress called - Success");
 
-                return Ok(address.Id);
+                return Ok(newAddress.Id);
             }
         }
 

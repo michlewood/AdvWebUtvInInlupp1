@@ -7,6 +7,7 @@ using Kundregister.Entities;
 using System.Globalization;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
+using Kundregister.Models;
 
 namespace Kundregister.Controllers
 {
@@ -39,7 +40,7 @@ namespace Kundregister.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddCustomer(Customer customer)
+        public IActionResult AddCustomer(AddCustomerVM addCustomerVM)
         {
             if (!ModelState.IsValid)
             {
@@ -48,11 +49,20 @@ namespace Kundregister.Controllers
             }
             else
             {
-                customerRepository.AddCustomer(customer);
+                var newCustomer = new Customer
+                {
+                    FirstName = addCustomerVM.FirstName,
+                    LastName = addCustomerVM.LastName,
+                    Email = addCustomerVM.Email,
+                    Gender = addCustomerVM.Gender,
+                    Age = addCustomerVM.Age,
+                    DateCreated = addCustomerVM.DateCreated
+                };
+                customerRepository.AddCustomer(newCustomer);
 
                 _logger.LogInformation("AddCustomer called - Success");
 
-                return Ok(customer.Id);
+                return Ok(newCustomer.Id);
             }
         }
 
@@ -86,7 +96,6 @@ namespace Kundregister.Controllers
 
             if (worked)
             {
-                databaseContext.SaveChanges();
                 _logger.LogInformation("EditCustomer called - Success");
                 return Ok($"Updated {capitalizedPropertyName} of id: {customerToEdit.Id} to {value}");
             }
@@ -112,7 +121,7 @@ namespace Kundregister.Controllers
         public IActionResult CountCustomers()
         {
             _logger.LogInformation("CountCustomers called - Success");
-            return Ok(databaseContext.Customers.Count());
+            return Ok(customerRepository.CountCustomers());
         }
 
         [HttpGet, Route("seed")]
@@ -130,21 +139,27 @@ namespace Kundregister.Controllers
         public IEnumerable<Address> GetCustomerAddresses(int id)
         {
             _logger.LogInformation("GetCustomerAddresses called - Success");
-            return databaseContext.GetAllAddressesForGivenCustomerId(id);
+            return customerRepository.GetCustomerAddresses(id);
         }
 
         [HttpPost, Route("{custId}/address/{addressId}")]
-        public IActionResult AddRelationsBetweenCustomerAndAddress(CustomerToAddressRelations newRelation)
+        public IActionResult AddRelationsBetweenCustomerAndAddress(AddRelationVM addRelationVM)
         {
             if (ModelState.IsValid)
             {
-                if (databaseContext.Relations.Any(relation => relation.CustId == newRelation.CustId && relation.AdressId == newRelation.AdressId))
+                if (databaseContext.Relations.Any(relation => relation.CustId == addRelationVM.CustId && relation.AdressId == addRelationVM.AddressId))
                 {
                     _logger.LogInformation("AddRelationsBetweenCustomerAndAddress called - Failed");
                     return BadRequest("Relation already exists");
                 }
                 else
                 {
+                    customerRepository.GetCustomerById(addRelationVM.CustId).DateEdited = DateTime.Now;
+                    var newRelation = new CustomerToAddressRelations
+                    {
+                        CustId = addRelationVM.CustId,
+                        AdressId = addRelationVM.AddressId
+                    };
                     databaseContext.Add(newRelation);
                     databaseContext.SaveChanges();
                     _logger.LogInformation("AddRelationsBetweenCustomerAndAddress called - Success");
@@ -165,6 +180,7 @@ namespace Kundregister.Controllers
             {
                 databaseContext.Remove(relation);
             }
+            customerRepository.GetCustomerById(custId).DateEdited = DateTime.Now;
             databaseContext.SaveChanges();
             _logger.LogInformation("RemoveRelationsBetweenCustomerAndAddress called - Success");
             return Ok("Relations removed");

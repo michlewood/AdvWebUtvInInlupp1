@@ -14,5 +14,7 @@ namespace Kundregister.Models
         void RemoveCustomer(Customer customerToRemove);
         bool UpdateCustomer(Customer customerToEdit, string nameOfPropertyToUpdateValue, string newValue);
         void SeedCustomers(string dataLocation);
+        int CountCustomers();
+        IEnumerable<Address> GetCustomerAddresses(int id);
     }
 }
