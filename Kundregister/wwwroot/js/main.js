@@ -104,7 +104,10 @@ $("#getAllCustomers").click(function () {
                         `<td><a href="#" class="edit" data-name="gender" data-type="text" data-pk="${item.id}" data-title="Enter Gender">${item.gender}</a></td>` +
                         `<td><a href="#" class="edit" data-name="email" data-type="text" data-pk="${item.id}" data-title="Enter Email">${item.email}</a></td>` +
                         `<td><a href="#" class="edit" data-name="age" data-type="text" data-pk="${item.id}" data-title="Enter Age">${item.age}</a></td>` +
-                        `<td><a href="#" class="address" id="${item.id}" data-title="Address"><button class="btn btn-info">A</button></a></td>` +
+                        `<td><div data-name="dateCreated" data-type="text" data-pk="${item.id}">${item.dateCreated.substring(0, 10)}</div></td>`;
+                    if (item.dateEdited != null) generatedResult += `<td><div data-name="dateEdited" data-type="text" data-pk="${item.id}">${item.dateEdited.substring(0, 10)}</div></td>`;
+                    else generatedResult += `<td><div data-name="dateEdited" data-type="text" data-pk="${item.id}">Never edited</div></td>`;
+                    generatedResult += ` <td><a href="#" class="address" id="${item.id}" data-title="Address"><button class="btn btn-info">A</button></a></td>` +
                         `<td><a href="#" class="delete" id="${item.id}" data-title="Delete"><button class="btn btn-danger">X</button></a></td>` +
                         '</tr>';
                 });
@@ -117,6 +120,9 @@ $("#getAllCustomers").click(function () {
             $(".edit").editable({
                 type: 'text',
                 url: `/api/customers/${this.id}`,
+                success: function (response) {
+                    $("#getAllCustomers").click();
+                },  
                 fail: function (response) {
                     console.log(response);
                 }
@@ -138,8 +144,8 @@ $("#getAllCustomers").click(function () {
 
             $(".address").click(function () {
                 let idForCustomer = this.id;
+                console.log(idForCustomer);
 
-                console.log(this.id);
                 $.ajax({
                     url: `/api/customers/${idForCustomer}/address`,
                     method: 'GET'
@@ -154,7 +160,7 @@ $("#getAllCustomers").click(function () {
                         + '</button>'
                         + '</div>'
                         + '<div class="modal-body">'
-                        + '<table class="table">'
+                        + '<table class="table" id="addressField">'
                         + '<tbody>';
 
                     if (result.length === 0) {
@@ -185,13 +191,12 @@ $("#getAllCustomers").click(function () {
                         + '</table >'
                         + '</div >'
                         + '<div class="modal-footer">'
-                        + '<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>'
                         + '<button type="button" class="btn btn-primary newAddress">Add New</button>'
                         + '</div></div></div>';
                     $("#addressModal").html(modalContent);
                     $("#addressModal").modal(show = true);
 
-                    AddressFunctions(idForCustomer);
+                    AddressFunctions(idForCustomer, result);
                 });
             });
         })
@@ -202,7 +207,43 @@ $("#getAllCustomers").click(function () {
         });
 });
 
-function AddressFunctions(customerId) {
+function fillAddresses(idForCustomer) {
+    let modalContent;
+    $.ajax({
+        url: `/api/customers/${idForCustomer}/address`,
+        method: 'GET'
+
+    })
+        .done(function (result) {
+            if (result.length === 0) {
+                modalContent = '<h2>No addresses</h2>';
+            }
+            else {
+                modalContent = '<thead><tr>'
+                    + '<th scope="col">#</th>'
+                    + '<th scope="col">Street</th>'
+                    + '<th scope="col">Number</th> '
+                    + '<th scope="col">Postcode</th> '
+                    + '<th scope="col">Area</th> '
+                    + '<th scope="col">Delete</th> '
+                    + '</tr></thead>';
+
+                $.each(result, function (index, item) {
+                    modalContent += `<tr><th scope="row">${item.id}</th >`
+                        + `<td><span href="#" class="editAddress" data-name="streetName" data-type="text" data-pk="${item.id}" data-title="Enter Street Name">${item.streetName}</span></td>`
+                        + `<td><span href="#" class="editAddress" data-name="streetNumber" data-type="text" data-pk="${item.id}" data-title="Enter Street Number">${item.streetNumber}</span></td>`
+                        + `<td><span href="#" class="editAddress" data-name="postalCode" data-type="text" data-pk="${item.id}" data-title="Enter Postal Code">${item.postalCode}</span></td>`
+                        + `<td><span href="#" class="editAddress" data-name="area" data-type="text" data-pk="${item.id}" data-title="Enter Area Name">${item.area}</span></td>`
+                        + `<td class="addressDelete" id=${item.id}><button class="btn btn-danger">X</button></td>`
+                        + '</td ></tr >';
+                });
+            }
+            $("#addressField").html(modalContent);
+            AddressFunctions(idForCustomer, result)
+        });
+}
+
+function AddressFunctions(customerId, result) {
     $(".newAddress").click(function () {
         console.log(customerId);
         $.ajax({
@@ -212,8 +253,10 @@ function AddressFunctions(customerId) {
             .done(function (result) {
                 $("#status").text(result);
                 $('#status').append("<hr />");
+                fillAddresses(customerId);
             });
     });
+
 
     $(".addressDelete").click(function () {
         let idOfAddress = this.id;
@@ -225,6 +268,7 @@ function AddressFunctions(customerId) {
             .done(function (result) {
                 $("#status").text(result);
                 $('#status').append("<hr />");
+                fillAddresses(customerId);
             });
     });
 
@@ -237,7 +281,7 @@ function AddressFunctions(customerId) {
         fail: function (response) {
             $("#status").html(response);
         }
-    });
+    })
 }
 
 $("#seedCustomers").click(function () {
