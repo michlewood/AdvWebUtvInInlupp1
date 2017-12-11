@@ -137,7 +137,10 @@ $("#getAllCustomers").click(function () {
                         `<td><a href="#" class="edit" data-name="gender" data-type="text" data-pk="${item.id}" data-title="Enter Gender">${item.gender}</a></td>` +
                         `<td><a href="#" class="edit" data-name="email" data-type="text" data-pk="${item.id}" data-title="Enter Email">${item.email}</a></td>` +
                         `<td><a href="#" class="edit" data-name="age" data-type="text" data-pk="${item.id}" data-title="Enter Age">${item.age}</a></td>` +
-                        `<td><a href="#" class="addressModule" id="${item.id}" data-title="Address"><button class="btn btn-info">A</button></a></td>` +
+                        `<td><div data-name="dateCreated" data-type="text" data-pk="${item.id}">${item.dateCreated.substring(0, 10)}</div></td>`;
+                    if (item.dateEdited != null) generatedResult += `<td><div data-name="dateEdited" data-type="text" data-pk="${item.id}">${item.dateEdited.substring(0, 10)}</div></td>`; 
+                    else generatedResult += `<td><div data-name="dateEdited" data-type="text" data-pk="${item.id}">Never edited</div></td>`; 
+                    generatedResult += `<td><a href="#" class="addressModule" id="${item.id}" data-title="Address"><button class="btn btn-info">A</button></a></td>` +
                         `<td><a href="#" class="delete" id="${item.id}" data-title="Delete"><button class="btn btn-danger">X</button></a></td>` +
                         '</tr>';
                 });
@@ -221,17 +224,14 @@ $("#getAllCustomers").click(function () {
                         + '</div >'
                         + '<div class="modal-footer">'
                         + '<div class="test">';
-
-
-
+                    
                     modalContent += '</div>'
                         + '<button type="button" class="btn btn-primary newAddress">Add New</button>'
                         + '</div></div></div>';
                     $("#addressModal").html(modalContent);
                     $("#addressModal").modal(show = true);
-                    valueOfSelectedAddress = null;
-                    getAddressSelectMenu(idForCustomer, addressesForACustomer);
-                    AddressFunctions(idForCustomer);
+                    
+                    AddressFunctions(idForCustomer, addressesForACustomer);
 
 
                     $(".newAddress").click(function () {
@@ -253,9 +253,6 @@ $("#getAllCustomers").click(function () {
                                 $('#status').append("<hr />");
                             })
                     });
-
-
-
                 });
             });
         })
@@ -268,6 +265,36 @@ $("#getAllCustomers").click(function () {
 });
 
 let valueOfSelectedAddress;
+
+function AddressFunctions(customerId, addressesForACustomer) {
+
+    valueOfSelectedAddress = null;
+
+    getAddressSelectMenu(customerId, addressesForACustomer);
+
+    $(".addressDelete").click(function () {
+        let idOfAddress = this.id;
+        $.ajax({
+            url: `api/customers/${customerId}/address/${idOfAddress}`,
+            method: 'DELETE'
+        })
+            .done(function (result) {
+                $("#status").text(result);
+                $('#status').append("<hr />");
+            });
+    });
+
+    $(".editAddress").editable({
+        type: 'text',
+        url: `/api/address/${this.id}`,
+        success: function (response) {
+            $("#status").html(response)
+        },
+        fail: function (response) {
+            $("#status").html(response);
+        }
+    });
+}
 
 function getAddressSelectMenu(customerId, addressesForACustomer) {
     console.log(addressesForACustomer);
@@ -295,31 +322,6 @@ function getAddressSelectMenu(customerId, addressesForACustomer) {
 function changeValue(selectObject) {
     valueOfSelectedAddress = selectObject.value;
     console.log(valueOfSelectedAddress);
-}
-
-function AddressFunctions(customerId) {
-    $(".addressDelete").click(function () {
-        let idOfAddress = this.id;
-        $.ajax({
-            url: `api/customers/${customerId}/address/${idOfAddress}`,
-            method: 'DELETE'
-        })
-            .done(function (result) {
-                $("#status").text(result);
-                $('#status').append("<hr />");
-            });
-    });
-
-    $(".editAddress").editable({
-        type: 'text',
-        url: `/api/address/${this.id}`,
-        success: function (response) {
-            $("#status").html(response)
-        },
-        fail: function (response) {
-            $("#status").html(response);
-        }
-    });
 }
 
 $("#seedCustomers").click(function () {
