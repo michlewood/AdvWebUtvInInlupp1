@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kundregister.Entities
 {
@@ -13,6 +14,7 @@ namespace Kundregister.Entities
 
         public string Email { get; set; }
 
+        [CustomGender]
         public string Gender { get; set; }
 
         public int Age { get; set; }
