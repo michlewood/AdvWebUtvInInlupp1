@@ -13,4 +13,24 @@
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <_CustomFiles_Datafiles Include="$(MSBuildProjectDirectory)/DataFilesLocal/**/*" />
+    <DotnetPublishFiles Include="@(_CustomFiles_Datafiles)">
+      <DestinationRelativePath>Datafiles/%(RecursiveDir)%(Filename)%(Extension)</DestinationRelativePath>
+    </DotnetPublishFiles>
+  </ItemGroup>
+
+  <ItemGroup>
+    <_CustomFiles_Animals Include="$(MSBuildProjectDirectory)/../Djur/**/*" />
+    <DotnetPublishFiles Include="@(_CustomFiles_Animals)">
+      <DestinationRelativePath>Animals/%(RecursiveDir)%(Filename)%(Extension)</DestinationRelativePath>
+    </DotnetPublishFiles>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="wwwroot/NotForPublish.html" CopyToPublishDirectory="Never" />
+    <Content Update="wwwroot/secret*" CopyToPublishDirectory="Never" />
+    <Content Update="wwwroot\secrethtml\**\*" CopyToPublishDirectory="Never" />
+  </ItemGroup>
+
 </Project>
